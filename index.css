@@ -25,6 +25,7 @@
     --black: #0c0d13;
 
     --radius-m: 8px;
+    --shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     --hover-l: inset 0 0 1000px rgba(255, 255, 255, 0.3);
 }
 
@@ -49,6 +50,12 @@ body {
     user-select: none;
 }
 
+#game {
+    border-radius: var(--radius-m);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
 #status {
     display: flex;
     justify-content: space-between;
@@ -57,7 +64,6 @@ body {
     padding: 10px;
     color: var(--white);
     background: var(--green-d);
-    border-radius: var(--radius-m) var(--radius-m) 0 0;
 
     .row {
         display: flex;
@@ -87,8 +93,6 @@ body {
 }
 
 #field {
-    border-radius: 0 0 var(--radius-m) var(--radius-m);
-    overflow: hidden;
 
     .row {
         display: flex;
@@ -242,15 +246,15 @@ body.bomb {
     }
 
     25% {
-        transform: translate(5px, -5px)
+        transform: translate(2px, -2px)
     }
 
     50% {
-        transform: translate(-5px, 0)
+        transform: translate(-2px, 0)
     }
 
     75% {
-        transform: translate(5px, 0)
+        transform: translate(2px, 0)
     }
 
     100% {

@@ -1,7 +1,7 @@
 var config = {
-    width: 40,
-    height: 70,
-    mineCount: 200,
+    width: 10,
+    height: 10,
+    mineCount: 10,
     blankClick: true,
     debug: false,
 }
@@ -13,10 +13,9 @@ const auto_config = (minePercent = 0.2) => {
     const totalCells = config.width * config.height;
     config.mineCount = minePercent * totalCells;
 }
-auto_config();
+// auto_config();
 
 var mineArr = [];
-var gameStateArr = [];
 var isFirstClick = true;
 
 const DOMS = {
@@ -79,34 +78,29 @@ const addConfetti = (dom) => {
 
 // onZero = T, not place mine around it
 const randomMine = (excludeX = null, excludeY = null, onZero = false) => {
-    // make arr - moved inside randomMine so it resets cleanly
-    mineArr = []; // Clear array before filling
+    // make arr
+    mineArr = [];
     for (let x = 0; x < config.width; x++) {
         const row = [];
-        for (let y = 0; y < config.height; y++) row.push("o");
+        for (let y = 0; y < config.height; y++) row.push({ mine: false, reveal: false });
         mineArr.push(row);
     }
-    gameStateArr = [...mineArr];
 
     // add mine
     for (let i = 0; i < config.mineCount; i++) {
         let minePlaced = false;
         while (!minePlaced) {
-            const x = randomR(0, config.width - 1); // Ensure randomR is inclusive/exclusive correctly
+            const x = randomR(0, config.width - 1);
             const y = randomR(0, config.height - 1);
 
-            // Check if the spot is already occupied
-            if (mineArr[x][y] === "x") {
-                continue; // Spot already has a mine, try again
-            }
+            //  if already has a mine
+            if (mineArr[x][y].mine) continue;
 
-            // Check if we are enforcing the safe zone rule and if this spot is in it
-            if (onZero && isSafeZone(x, y, excludeX, excludeY, config)) {
-                continue; // Spot is in the safe zone, try again
-            }
+            if (onZero && isSafeZone(x, y, excludeX, excludeY, config)) continue;
 
-            // If we reach here, the spot is valid. Place the mine and break the while loop.
-            mineArr[x][y] = "x";
+
+            // add mine
+            mineArr[x][y].mine = true;
             minePlaced = true;
         }
     }
@@ -139,10 +133,7 @@ const cellNumber = (x, y) => {
             const withinBoundsY = neighborY >= 0 && neighborY < config.height;
 
             if (withinBoundsX && withinBoundsY) {
-                // Access the array correctly using [][], not [, ]
-                if (mineArr[neighborX][neighborY] === "x") {
-                    totalMine++;
-                }
+                if (mineArr[neighborX][neighborY].mine) totalMine++;
             }
         }
     }
@@ -153,11 +144,16 @@ const cellNumber = (x, y) => {
 const revealEmptyCells = (x, y) => {
     if (x < 0 || x >= config.width || y < 0 || y >= config.height) return;
 
-    const cell = [...[...DOMS.field.querySelectorAll(".row")][x].querySelectorAll(".cell")][y];
-    if (cell.className.includes("revealed")) return;
+    const cell = DOMS.field.querySelector(`[data-index="${x}-${y}"]`);
+    if (!cell) return;
+
+    // if (cell.className.includes("revealed")) return;
+    if (mineArr[x][y].reveal) return;
 
     cell.classList.add("revealed");
+    mineArr[x][y].reveal = true;
     const mineCount = cellNumber(x, y);
+
     if (mineCount > 0) {
         cell.textContent = mineCount;
         cell.classList.add("num-" + mineCount);
@@ -180,14 +176,35 @@ const revealEmptyCells = (x, y) => {
     }
 };
 
+const gameCheck = () => {
+    let isEnd = true;
+
+    GameLoop: // Label the outer loop
+    for (let x = 0; x < config.width; x++) {
+        for (let y = 0; y < config.height; y++) {
+            if (mineArr[x][y].mine) continue;
+
+            const cell = DOMS.field.querySelector(`div[data-index="${x}-${y}"]`);
+            if (cell && !cell.className.includes("revealed")) {
+                isEnd = false;
+                break GameLoop;
+            }
+        }
+    }
+
+    if (isEnd) {
+        alert("Done !!!");
+        timer("stop");
+    }
+};
+
 const cellFunction = () => {
     document.querySelector("#field").querySelectorAll(".cell").forEach(cell => {
+        const textindex = cell.dataset.index;
+        const [x, y] = textindex.split("-").map(el => Number(el));
 
         cell.addEventListener("click", () => {
             if ([...cell.classList].includes("flag")) return;
-
-            const textindex = cell.dataset.index;
-            const [x, y] = textindex.split("-").map(el => Number(el));
 
             if (isFirstClick) {
                 isFirstClick = false;
@@ -199,21 +216,20 @@ const cellFunction = () => {
                     document.querySelector("#field").querySelectorAll(".cell").forEach(debugCell => {
                         const debugIndex = debugCell.dataset.index;
                         const [dx, dy] = debugIndex.split("-").map(el => Number(el));
-                        const content = mineArr[dx][dy] === 'x' ? '💣' : cellNumber(dx, dy) || '';
+                        const content = mineArr[dx][dy].mine ? '💣' : cellNumber(dx, dy) || '';
                         debugCell.textContent = content;
                         twemoji.parse(document.body);
                     })
                 }
             }
 
-            const isMine = mineArr[x][y] === "x"
-            if (!isMine) {
+            if (!mineArr[x][y].mine) {
                 const minesAround = cellNumber(x, y);
                 cell.textContent = minesAround > 0 ? minesAround : '';
                 revealEmptyCells(x, y);
                 cell.classList.add('revealed');
                 cell.classList.add("num-" + minesAround);
-                gameStateArr[x, y] = "x";
+                gameCheck();
             }
             else {
                 console.log("game over");
@@ -225,8 +241,9 @@ const cellFunction = () => {
             }
         })
 
-        cell.addEventListener("contextmenu", (e) => {
+        const addFlag = (e) => {
             e.preventDefault();
+            if (cell.textContent !== "" || cell.className.includes("revealed")) return;
 
             if ([...cell.classList].includes("flag")) {
                 cell.classList.remove("flag");
@@ -238,6 +255,17 @@ const cellFunction = () => {
 
             twemoji.parse(document.body);
             updateFlag();
+        }
+        cell.addEventListener("contextmenu", addFlag)
+        cell.addEventListener("dblclick", addFlag)
+
+        cell.addEventListener("mousedown", () => {
+            if (!isFirstClick && mineArr[x][y].mine && randomR(0, 10) > 7) DOMS.btn_reset.innerHTML = "😲";
+            twemoji.parse(document.body);
+        })
+        cell.addEventListener("mouseup", () => {
+            DOMS.btn_reset.innerHTML = "🙃";
+            twemoji.parse(document.body);
         })
     })
 }
