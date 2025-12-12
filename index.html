@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link href="index.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+    <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="game">
+        <div id="status">
+            <div>&nbsp;</div>
+            <div class="row">
+                <span class="img fx">🚩</span>
+                <span id="bomb_count">0</span>
+                <span>&nbsp;</span>
+                <span class="img">🕑</span>
+                <span id="time_count">00:00</span>
+            </div>
+            <div class="row">
+                <div id="btn_reset" class="btn img">🙃</div>
+                <!-- <div class="btn img">⚙</div> -->
+            </div>
+        </div>
+        <div id="field"></div>
+    </div>
+
+    <div id="setting" class="modal">
+        <div class="row">
+            <h3>Settings</h3>
+            <div class="btn img close">❌</div>
+        </div>
+        <div class="row">
+            <span>Width</span>
+            <div class="input-wrapper">
+                <input>
+            </div>
+        </div>
+        <div class="row">
+            <span>Height</span>
+            <div class="input-wrapper">
+                <input>
+            </div>
+        </div>
+        <div class="row">
+            <span>Mine Count</span>
+            <div class="input-wrapper">
+                <input>
+            </div>
+        </div>
+    </div>
+    <div id="gameover" class="modal">
+        <div class="body">
+            <div class="row">
+                <h3>Game Over</h3>
+                <div class="btn img close">❌</div>
+            </div>
+            <div class="row" style="font-weight: bold;">
+                <span>Found</span>
+                <span>0</span>
+                <span class="img">💣</span>
+                <span>in</span>
+                <span>00:00</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+
+</html>
