@@ -13,7 +13,7 @@ const auto_config = (minePercent = 0.2) => {
     const totalCells = config.width * config.height;
     config.mineCount = minePercent * totalCells;
 }
-// auto_config();
+auto_config();
 
 var mineArr = [];
 var isFirstClick = true;
@@ -164,12 +164,6 @@ const revealEmptyCells = (x, y) => {
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
                 if (dx === 0 && dy === 0) continue;
-
-                // Call the function recursively on the neighbors
-                document.body.classList.add("bomb");
-                setTimeout(() => {
-                    document.body.classList.remove("bomb");
-                }, 2000);
                 revealEmptyCells(x + dx, y + dy);
             }
         }
@@ -327,3 +321,4 @@ DOMS.btn_reset.addEventListener("click", () => {
     cellFunction();
     updateFlag();
 })
+
