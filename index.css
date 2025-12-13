@@ -20,7 +20,7 @@
     --num-black: #000000;
     --num-grey: #a39e93;
 
-    --bg: #e8ffd8;
+    --bg: radial-gradient(circle,rgba(252, 255, 250, 1) 0%, rgba(232, 255, 216, 1) 50%);
     --white: #ffffff;
     --black: #0c0d13;
 
@@ -260,4 +260,5 @@ body.bomb {
     100% {
         transform: translate(0, 0)
     }
+
 }
